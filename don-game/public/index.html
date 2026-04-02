@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Разведгруппа Дона | 1941</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a1a;
+            font-family: 'Courier New', monospace;
+            color: #d4d4d4;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 1400px;
+            width: 100%;
+            height: 90vh;
+            display: flex;
+            gap: 20px;
+            background: #2a2a2a;
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .chat-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .image-panel {
+            flex: 1;
+            background: #1e1e1e;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .image-header {
+            background: #3a2a1a;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #5a4a3a;
+        }
+        .image-container {
+            flex: 1;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            padding: 10px 14px;
+            border-radius: 8px;
+            max-width: 85%;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .user-message {
+            background: #3a5a3a;
+            align-self: flex-end;
+            color: #d4ffd4;
+        }
+        .narator-message {
+            background: #2a2a3a;
+            align-self: flex-start;
+            border-left: 3px solid #8a6a3a;
+        }
+        .input-area {
+            padding: 16px;
+            border-top: 1px solid #3a3a3a;
+            display: flex;
+            gap: 10px;
+        }
+        .input-area input {
+            flex: 1;
+            background: #2a2a2a;
+            border: 1px solid #5a5a5a;
+            color: #d4d4d4;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .input-area button {
+            background: #5a3a1a;
+            border: none;
+            color: #d4d4d4;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .input-area button:hover { background: #7a5a2a; }
+        .status {
+            padding: 8px 16px;
+            background: #2a2a1a;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="chat-panel">
+        <div class="chat-messages" id="chatMessages">
+            <div class="message narator-message">
+                ⚡ Разведгруппа Дона. Штаб 16-й армии. Землянка. Вечер перед выходом.<br><br>
+                Дон сидит на наре. Рыжий возится с рацией. Соколов молчит. Шубин и Кравцов у печки.<br><br>
+                <span style="color: #8a8a5a;">Напиши, что делает Дон.</span>
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Дон, твой ход..." autofocus>
+            <button id="sendBtn">➤ ОТДАТЬ ПРИКАЗ</button>
+        </div>
+        <div class="status">
+            🎖️ ДОН | 4 медали «За отвагу», 2 ордена Красной Звезды | Выход завтра
+        </div>
+    </div>
+    <div class="image-panel">
+        <div class="image-header">🎬 ЗЕМЛЯНКА</div>
+        <div class="image-container" id="imageContainer">
+            <img id="sceneImage" src="/images/earth.jpg" alt="Землянка">
+        </div>
+    </div>
+</div>
+<script>
+    let conversationId = 'don-game-' + Date.now();
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const sceneImage = document.getElementById('sceneImage');
+    
+    function addMessage(text, isUser = false) {
+        const div = document.createElement('div');
+        div.className = `message ${isUser ? 'user-message' : 'narator-message'}`;
+        div.innerHTML = isUser ? `🎖️ ДОН: ${text}` : text.replace(/\n/g, '<br>');
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+        addMessage(message, true);
+        messageInput.value = '';
+        messageInput.disabled = true;
+        sendBtn.disabled = true;
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message narator-message';
+        loadingDiv.id = 'loadingMsg';
+        loadingDiv.innerHTML = '⏳ Думаю...';
+        chatMessages.appendChild(loadingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, conversationId })
+            });
+            const data = await response.json();
+            loadingDiv.remove();
+            addMessage(data.reply);
+            if (data.image) sceneImage.src = `/images/${data.image}`;
+        } catch (error) {
+            loadingDiv.remove();
+            addMessage('❌ Ошибка связи с сервером.');
+        }
+        messageInput.disabled = false;
+        sendBtn.disabled = false;
+        messageInput.focus();
+    }
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+</script>
+</body>
+</html>
