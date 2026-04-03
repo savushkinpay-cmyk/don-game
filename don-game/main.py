@@ -63,6 +63,7 @@ def init_db():
         c.executemany("INSERT INTO group_inventory (item_name, quantity, unit) VALUES (?,?,?)", inventory)
         
         c.execute("INSERT OR IGNORE INTO game_state (key, value) VALUES ('turn', '0')")
+        c.execute("INSERT OR IGNORE INTO game_state (key, value) VALUES ('current_location', 'землянка')")
     
     conn.commit()
     conn.close()
@@ -98,6 +99,22 @@ def save_history(role, content):
     c.execute("UPDATE game_state SET value=? WHERE key='turn'", (str(new_turn),))
     conn.commit()
     conn.close()
+
+def get_game_status():
+    conn = sqlite3.connect('game.db')
+    c = conn.cursor()
+    
+    chars = c.execute("SELECT name, status, weapon, equipment, wounds FROM characters").fetchall()
+    characters_list = [{"name": n, "status": s, "weapon": w or "нет", "equipment": e or "нет", "wounds": wu or "нет"} for n,s,w,e,wu in chars]
+    
+    inv = c.execute("SELECT item_name, quantity, unit FROM group_inventory").fetchall()
+    inventory_list = [{"name": i, "quantity": q, "unit": u} for i,q,u in inv]
+    
+    turn = c.execute("SELECT value FROM game_state WHERE key='turn'").fetchone()[0]
+    location = c.execute("SELECT value FROM game_state WHERE key='current_location'").fetchone()[0]
+    
+    conn.close()
+    return {"characters": characters_list, "inventory": inventory_list, "turn": turn, "location": location}
 
 # ========== GROQ API ==========
 
@@ -163,6 +180,10 @@ def chat():
     save_history('assistant', reply)
     
     return jsonify({"reply": reply, "image": "earth.jpg"})
+
+@app.route('/api/status', methods=['GET'])
+def status():
+    return jsonify(get_game_status())
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
