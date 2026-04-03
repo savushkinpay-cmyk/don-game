@@ -17,7 +17,7 @@
             padding: 20px;
         }
         .game-container {
-            max-width: 1400px;
+            max-width: 1600px;
             width: 100%;
             height: 90vh;
             display: flex;
@@ -26,6 +26,45 @@
             border-radius: 16px;
             padding: 20px;
         }
+        /* Левая панель — персонажи */
+        .characters-panel {
+            width: 260px;
+            background: #1e1e1e;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .characters-header {
+            background: #3a2a1a;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #5a4a3a;
+        }
+        .characters-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .character-card {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #8a6a3a;
+        }
+        .character-name {
+            font-weight: bold;
+            color: #d4a84a;
+            margin-bottom: 5px;
+        }
+        .character-detail {
+            font-size: 11px;
+            color: #a0a0a0;
+            margin-top: 3px;
+        }
+        /* Центральная панель — чат */
         .chat-panel {
             flex: 2;
             display: flex;
@@ -33,6 +72,43 @@
             background: #1e1e1e;
             border-radius: 12px;
             overflow: hidden;
+        }
+        /* Правая панель — инвентарь */
+        .inventory-panel {
+            width: 260px;
+            background: #1e1e1e;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .inventory-header {
+            background: #3a2a1a;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #5a4a3a;
+        }
+        .inventory-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .inventory-item {
+            background: #2a2a2a;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .inventory-name {
+            color: #d4d4d4;
+        }
+        .inventory-qty {
+            color: #8a6a3a;
+            font-weight: bold;
         }
         .image-panel {
             flex: 1;
@@ -117,10 +193,48 @@
             font-size: 12px;
             text-align: center;
         }
+        .turn-counter {
+            color: #d4a84a;
+            font-weight: bold;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #5a4a3a; border-radius: 4px; }
     </style>
 </head>
 <body>
 <div class="game-container">
+    <!-- Левая панель: персонажи -->
+    <div class="characters-panel">
+        <div class="characters-header">🎖️ ЛИЧНЫЙ СОСТАВ</div>
+        <div class="characters-list" id="charactersList">
+            <div class="character-card">
+                <div class="character-name">ДОН</div>
+                <div class="character-detail">ОРУЖИЕ: кинжал + 3 ножа</div>
+                <div class="character-detail">СНАРЯЖ: бинокль, фонарь, компас</div>
+            </div>
+            <div class="character-card">
+                <div class="character-name">РЫЖИЙ</div>
+                <div class="character-detail">ОРУЖИЕ: Walther P-38</div>
+                <div class="character-detail">СНАРЯЖ: бинокль, фонарь, компас, ножницы</div>
+            </div>
+            <div class="character-card">
+                <div class="character-name">СОКОЛОВ</div>
+                <div class="character-detail">ОРУЖИЕ: Маузер 98k</div>
+                <div class="character-detail">РАНЕНИЯ: левая рука (шрам)</div>
+            </div>
+            <div class="character-card">
+                <div class="character-name">ШУБИН</div>
+                <div class="character-detail">СНАРЯЖ: рация Северок, трофейная рация</div>
+            </div>
+            <div class="character-card">
+                <div class="character-name">КРАВЦОВ</div>
+                <div class="character-detail">СНАРЯЖ: 4 толовые шашки, бикфордов шнур</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Центральная панель: чат -->
     <div class="chat-panel">
         <div class="chat-messages" id="chatMessages">
             <div class="message narator-message">
@@ -134,23 +248,77 @@
             <button id="sendBtn">➤ ОТДАТЬ ПРИКАЗ</button>
         </div>
         <div class="status">
-            🎖️ ДОН | 4 медали «За отвагу», 2 ордена Красной Звезды | Выход завтра
+            🎖️ ДОН | 4 медали «За отвагу», 2 ордена Красной Звезды | <span id="turnCounter" class="turn-counter">ХОД 0</span>
         </div>
     </div>
+
+    <!-- Правая панель: инвентарь -->
+    <div class="inventory-panel">
+        <div class="inventory-header">📦 ИМУЩЕСТВО</div>
+        <div class="inventory-list" id="inventoryList">
+            <div class="inventory-item"><span class="inventory-name">МП-40</span><span class="inventory-qty">3 шт</span></div>
+            <div class="inventory-item"><span class="inventory-name">Патроны 9мм</span><span class="inventory-qty">420 шт</span></div>
+            <div class="inventory-item"><span class="inventory-name">Патроны 7.92</span><span class="inventory-qty">300 шт</span></div>
+            <div class="inventory-item"><span class="inventory-name">Гранаты РГД-33</span><span class="inventory-qty">10 шт</span></div>
+            <div class="inventory-item"><span class="inventory-name">Сухой паёк</span><span class="inventory-qty">5 суток</span></div>
+            <div class="inventory-item"><span class="inventory-name">Аптечка</span><span class="inventory-qty">1 шт</span></div>
+        </div>
+    </div>
+
+    <!-- Картинка (опционально) -->
     <div class="image-panel">
-        <div class="image-header">🎬 ЗЕМЛЯНКА</div>
+        <div class="image-header">🎬 ЛОКАЦИЯ</div>
         <div class="image-container" id="imageContainer">
-            <img id="sceneImage" src="/images/earth.jpg" alt="Землянка">
+            <img id="sceneImage" src="/images/earth.jpg" alt="Сцена">
         </div>
     </div>
 </div>
+
 <script>
     let conversationId = 'don-game-' + Date.now();
     const chatMessages = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
     const sceneImage = document.getElementById('sceneImage');
-    
+    const turnCounter = document.getElementById('turnCounter');
+    const charactersList = document.getElementById('charactersList');
+    const inventoryList = document.getElementById('inventoryList');
+
+    async function loadStatus() {
+        try {
+            const response = await fetch('/api/status');
+            const data = await response.json();
+            
+            // Обновляем счётчик ходов
+            turnCounter.textContent = `ХОД ${data.turn}`;
+            
+            // Обновляем панель персонажей
+            charactersList.innerHTML = '';
+            for (const char of data.characters) {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                let details = `<div class="character-name">${char.name}</div>`;
+                if (char.weapon && char.weapon !== 'нет') details += `<div class="character-detail">ОРУЖИЕ: ${char.weapon}</div>`;
+                if (char.equipment && char.equipment !== 'нет') details += `<div class="character-detail">СНАРЯЖ: ${char.equipment}</div>`;
+                if (char.wounds && char.wounds !== 'нет') details += `<div class="character-detail">РАНЕНИЯ: ${char.wounds}</div>`;
+                if (char.status && char.status !== 'здоров') details += `<div class="character-detail">СТАТУС: ${char.status}</div>`;
+                card.innerHTML = details;
+                charactersList.appendChild(card);
+            }
+            
+            // Обновляем панель инвентаря
+            inventoryList.innerHTML = '';
+            for (const item of data.inventory) {
+                const invItem = document.createElement('div');
+                invItem.className = 'inventory-item';
+                invItem.innerHTML = `<span class="inventory-name">${item.name}</span><span class="inventory-qty">${item.quantity} ${item.unit}</span>`;
+                inventoryList.appendChild(invItem);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки статуса:', error);
+        }
+    }
+
     function addMessage(text, isUser = false) {
         const div = document.createElement('div');
         div.className = `message ${isUser ? 'user-message' : 'narator-message'}`;
@@ -158,40 +326,58 @@
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    
+
     async function sendMessage() {
         const message = messageInput.value.trim();
         if (!message) return;
+        
         addMessage(message, true);
         messageInput.value = '';
         messageInput.disabled = true;
         sendBtn.disabled = true;
+        
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'message narator-message';
         loadingDiv.id = 'loadingMsg';
         loadingDiv.innerHTML = '⏳ Думаю...';
         chatMessages.appendChild(loadingDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message, conversationId })
             });
+            
             const data = await response.json();
             loadingDiv.remove();
             addMessage(data.reply);
-            if (data.image) sceneImage.src = `/images/${data.image}`;
+            
+            if (data.image) {
+                sceneImage.src = `/images/${data.image}`;
+            }
+            
+            // Обновляем статус (персонажи, инвентарь, ход)
+            await loadStatus();
+            
         } catch (error) {
             loadingDiv.remove();
             addMessage('❌ Ошибка связи с сервером.');
         }
+        
         messageInput.disabled = false;
         sendBtn.disabled = false;
         messageInput.focus();
     }
+
     sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    
+    // Загружаем статус при старте
+    loadStatus();
 </script>
 </body>
 </html>
